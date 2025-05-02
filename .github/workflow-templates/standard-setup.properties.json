@@ -1,0 +1,6 @@
+{
+    "name": "Standard Repository Setup",
+    "description": "Standard workflow for issue tracking and PR management",
+    "iconName": "octicon rocket",
+    "categories": ["automation", "issues", "pull-requests"]
+}

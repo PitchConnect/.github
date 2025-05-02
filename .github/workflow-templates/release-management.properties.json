@@ -1,0 +1,6 @@
+{
+    "name": "Release Management",
+    "description": "Generate release PRs with all pending issues",
+    "iconName": "octicon tag",
+    "categories": ["automation", "releases"]
+}

@@ -1,0 +1,11 @@
+name: Standard Repository Setup
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened, converted_to_draft, ready_for_review, closed]
+
+jobs:
+  standard-setup:
+    uses: PitchConnect/.github/.github/workflows/standard-setup.yml@main

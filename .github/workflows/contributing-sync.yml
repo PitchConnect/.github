@@ -1,0 +1,56 @@
+name: CONTRIBUTING.md Sync
+
+on:
+  workflow_call:
+    inputs:
+      source_repo:
+        description: 'Source repository for CONTRIBUTING.md'
+        default: 'PitchConnect/contribution-guidelines'
+        type: string
+      source_path:
+        description: 'Path to CONTRIBUTING.md in source repo'
+        default: 'CONTRIBUTING.md'
+        type: string
+      target_path:
+        description: 'Path to CONTRIBUTING.md in target repo'
+        default: 'CONTRIBUTING.md'
+        type: string
+      preserve_section:
+        description: 'Section to preserve in target repo'
+        default: '## Repository-Specific Guidelines'
+        type: string
+
+jobs:
+  sync-contributing:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v3
+        
+      - name: Get source CONTRIBUTING.md
+        run: |
+          # Download source CONTRIBUTING.md
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3.raw" \
+            https://api.github.com/repos/${{ inputs.source_repo }}/contents/${{ inputs.source_path }} > source_contributing.md
+          
+          # Check if target CONTRIBUTING.md exists
+          if [ -f "${{ inputs.target_path }}" ]; then
+            # Extract repository-specific section
+            REPO_SPECIFIC=$(sed -n "/^${{ inputs.preserve_section }}/,/<!-- END COMMON SECTION -->/p" "${{ inputs.target_path }}")
+            
+            # Replace repository-specific section in source file
+            sed -i "/^${{ inputs.preserve_section }}/,/<!-- END COMMON SECTION -->/c\\$REPO_SPECIFIC" source_contributing.md
+          fi
+          
+          # Update target CONTRIBUTING.md
+          mv source_contributing.md "${{ inputs.target_path }}"
+          
+          # Commit changes if any
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add "${{ inputs.target_path }}"
+          git diff --staged --quiet || git commit -m "Update CONTRIBUTING.md from ${{ inputs.source_repo }}"
+          git push

@@ -1,0 +1,29 @@
+name: Standard Repository Setup
+
+on:
+  workflow_call:
+    inputs:
+      create_labels:
+        description: 'Create standard labels'
+        default: true
+        type: boolean
+      contributing_url:
+        description: 'URL to CONTRIBUTING.md'
+        default: 'https://github.com/PitchConnect/contribution-guidelines/blob/main/CONTRIBUTING.md'
+        type: string
+
+jobs:
+  setup-issue-tracking:
+    uses: PitchConnect/.github/.github/workflows/issue-labeler.yml@main
+    
+  setup-contributing-reminder:
+    uses: PitchConnect/.github/.github/workflows/contributing-reminder.yml@main
+    with:
+      contributing_url: ${{ inputs.contributing_url }}
+    
+  setup-pr-status-tracking:
+    uses: PitchConnect/.github/.github/workflows/pr-status-tracker.yml@main
+    
+  create-labels:
+    if: ${{ inputs.create_labels }}
+    uses: PitchConnect/.github/.github/workflows/label-creator.yml@main
