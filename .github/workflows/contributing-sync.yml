@@ -34,7 +34,7 @@ jobs:
           # Download source CONTRIBUTING.md
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3.raw" \
-            https://api.github.com/repos/${{ inputs.source_repo }}/contents/${{ inputs.source_path }} > source_contributing.md
+            "https://api.github.com/repos/${{ inputs.source_repo }}/contents/${{ inputs.source_path }}" > source_contributing.md
           
           # Check if target CONTRIBUTING.md exists
           if [ -f "${{ inputs.target_path }}" ]; then
