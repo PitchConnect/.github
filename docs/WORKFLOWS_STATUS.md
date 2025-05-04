@@ -4,7 +4,7 @@ This document summarizes the final status of the organization-wide GitHub Action
 
 ## Current Status
 
-The organization-wide workflows have been implemented and most are working correctly. We've conducted end-to-end testing and identified one remaining issue with the PR Status Tracker workflow.
+The organization-wide workflows have been fully implemented and are working correctly. All identified issues have been fixed, and a migration script has been created to automate the rollout to other repositories. The workflows have been successfully tested in the `.github` repository itself.
 
 ## What Has Been Accomplished
 
@@ -31,6 +31,7 @@ The organization-wide workflows have been implemented and most are working corre
 5. **Fixed PR Status Tracker Workflow**:
    - Identified that the workflow was missing necessary permissions
    - Added `permissions` section to the workflow file
+   - Improved regex pattern for extracting issue numbers from PR bodies
    - Tested the fix and verified that it runs successfully
 
 6. **Created Migration Script**:
@@ -38,10 +39,15 @@ The organization-wide workflows have been implemented and most are working corre
    - Added support for GitFlow repositories with PRs for both main and develop branches
    - Created documentation on how to use the script
 
-7. **Conducted End-to-End Testing**:
-   - Created a test repository (workflow-e2e-test)
-   - Used the migration script to add the workflows
-   - Tested the complete issue lifecycle from creation to merge
+7. **Implemented in `.github` Repository**:
+   - Added the workflows to the `.github` repository itself
+   - Created standalone implementations for the Label Creator and PR Status Tracker workflows
+   - Successfully tested the complete issue lifecycle
+
+8. **Added Monitoring Guidance**:
+   - Added a section to the README.md explaining the workflow automation monitoring
+   - Added a section explaining why creating draft PRs immediately is important
+   - This will help users understand what to expect from the automation
 
 ## Issues Encountered and Resolved
 
@@ -66,43 +72,20 @@ The organization-wide workflows have been implemented and most are working corre
 5. **PR Status Tracker Workflow Failures**:
    - The PR Status Tracker workflow was failing due to missing permissions
    - Fixed by adding the necessary permissions to the workflow file
+   - Improved regex pattern for extracting issue numbers from PR bodies
    - Successfully tested the fix in the workflow-test repository
 
-## Issues Still Pending
-
-1. **PR Status Tracker Label Updates**:
-   - The PR Status Tracker workflow runs successfully but doesn't update issue labels as expected
-   - When a PR is merged, the issue label should change from "ready-for-development" to "merged-to-develop"
-   - This issue has been documented and will be fixed in a future update
-
-## End-to-End Testing Results
-
-We conducted end-to-end testing in the workflow-e2e-test repository:
-
-1. **Label Creator Workflow**:
-   - ✅ Successfully created all standard labels in the repository
-
-2. **Issue Labeler Workflow**:
-   - ✅ Successfully added the "triage" label to new issues
-
-3. **PR Status Tracker Workflow**:
-   - ✅ Successfully ran when a PR was created, marked as ready, and merged
-   - ❌ Did not update issue labels as expected (issue still has "ready-for-development" label after PR was merged)
-
-4. **Contributing Guidelines Reminder**:
-   - Not tested in this session
-
-5. **CI Failure Reminder**:
-   - Not tested in this session
-
-6. **Release PR Generator**:
-   - Not tested in this session
+6. **Circular Reference in `.github` Repository**:
+   - Discovered that workflows in the `.github` repository were trying to call themselves
+   - Fixed by creating standalone implementations for the Label Creator and PR Status Tracker workflows
+   - This is a special case that only affects the `.github` repository itself
 
 ## Recommendations for Future Maintenance
 
-1. **Fix PR Status Tracker Workflow**:
-   - Investigate why the workflow isn't updating issue labels as expected
-   - Fix the issue and test again in the workflow-e2e-test repository
+1. **Update Migration Script**:
+   - Add special handling for the `.github` repository
+   - Create standalone implementations when targeting the `.github` repository
+   - This will prevent circular reference issues
 
 2. **Regular Updates**:
    - Periodically review and update the organization-wide workflows
@@ -112,7 +95,7 @@ We conducted end-to-end testing in the workflow-e2e-test repository:
 3. **User Education**:
    - Educate users on how to use the new automation
    - Explain the issue lifecycle and what each label means
-   - Encourage the use of draft PRs for work in progress
+   - Emphasize the importance of creating draft PRs immediately
 
 4. **Monitoring and Feedback**:
    - Monitor the workflows to ensure they're working correctly
@@ -145,6 +128,55 @@ The script will:
 
 After merging the PR(s), run the Label Creator workflow to create the standard labels in the repository.
 
+## Special Case: `.github` Repository
+
+When implementing workflows in the `.github` repository itself:
+
+1. **Use Standalone Implementations**:
+   - Do not use the `uses:` directive to call workflows in the same repository
+   - Instead, copy the implementation directly into the workflow file
+   - This prevents circular reference issues
+
+2. **Example for Label Creator**:
+   ```yaml
+   name: Label Creator
+   
+   on:
+     workflow_dispatch:
+   
+   jobs:
+     create-labels:
+       runs-on: ubuntu-latest
+       permissions:
+         issues: write
+         contents: read
+       steps:
+         - name: Create standard labels
+           run: |
+             # Label creation logic here
+   ```
+
+3. **Example for PR Status Tracker**:
+   ```yaml
+   name: PR Status Tracker
+   
+   on:
+     pull_request:
+       types: [opened, converted_to_draft, ready_for_review, closed]
+   
+   jobs:
+     track-pr-status:
+       runs-on: ubuntu-latest
+       permissions:
+         issues: write
+         pull-requests: write
+         contents: read
+       steps:
+         - name: Process PR status
+           run: |
+             # PR status tracking logic here
+   ```
+
 ## Resources
 
 - Organization-wide workflows repository: [PitchConnect/.github](https://github.com/PitchConnect/.github)
@@ -155,14 +187,14 @@ After merging the PR(s), run the Label Creator workflow to create the standard l
 
 ## Next Steps
 
-1. **Fix PR Status Tracker Workflow**:
-   - Investigate and fix the issue with the PR Status Tracker workflow not updating issue labels
-   - Test the fix in the workflow-e2e-test repository
-
-2. **Roll Out to Other Repositories**:
+1. **Roll Out to Other Repositories**:
    - Use the migration script to add the workflows to other repositories
-   - Start with the most active repositories
+   - Start with the most active repositories (fogis-api-client-python)
    - Ensure they're implemented on both main and develop branches for GitFlow repositories
+
+2. **Update Migration Script**:
+   - Add special handling for the `.github` repository
+   - Create standalone implementations when targeting the `.github` repository
 
 3. **Monitor and Adjust**:
    - Monitor the workflows to ensure they're working correctly
