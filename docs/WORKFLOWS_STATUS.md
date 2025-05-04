@@ -4,7 +4,7 @@ This document summarizes the final status of the organization-wide GitHub Action
 
 ## Current Status
 
-The organization-wide workflows have been fully implemented and are working correctly. All identified issues have been fixed, and a migration script has been created to automate the rollout to other repositories. The workflows have been successfully tested in the `.github` repository itself.
+The organization-wide workflows have been fully implemented and are working correctly. All identified issues have been fixed, and a migration script has been created to automate the rollout to other repositories. The workflows have been successfully tested in the `.github` repository itself and implemented in the fogis-api-client-python repository.
 
 ## What Has Been Accomplished
 
@@ -49,6 +49,11 @@ The organization-wide workflows have been fully implemented and are working corr
    - Added a section explaining why creating draft PRs immediately is important
    - This will help users understand what to expect from the automation
 
+9. **Implemented in fogis-api-client-python Repository**:
+   - Added the workflows to both the main and develop branches
+   - Created separate PRs for each branch
+   - Added clear documentation on what to do after merging
+
 ## Issues Encountered and Resolved
 
 1. **Workflow File Issues**:
@@ -80,12 +85,21 @@ The organization-wide workflows have been fully implemented and are working corr
    - Fixed by creating standalone implementations for the Label Creator and PR Status Tracker workflows
    - This is a special case that only affects the `.github` repository itself
 
+7. **Migration Script Issues**:
+   - The migration script had issues with GitFlow branch detection in the fogis-api-client-python repository
+   - The script didn't provide clear error messages when it encountered issues
+   - The script attempted to create branches that already existed
+   - Worked around these issues by manually creating the workflow files and PRs
+   - Created an issue (#18) to track improvements to the migration script
+
 ## Recommendations for Future Maintenance
 
-1. **Update Migration Script**:
+1. **Improve Migration Script**:
+   - Add better detection of GitFlow branches
+   - Add more robust error handling with clear error messages
+   - Add a better branch naming strategy to avoid collisions
+   - Add validation of workflow files before pushing them
    - Add special handling for the `.github` repository
-   - Create standalone implementations when targeting the `.github` repository
-   - This will prevent circular reference issues
 
 2. **Regular Updates**:
    - Periodically review and update the organization-wide workflows
@@ -127,6 +141,51 @@ The script will:
 5. For GitFlow repositories, create a second PR for the other long-living branch
 
 After merging the PR(s), run the Label Creator workflow to create the standard labels in the repository.
+
+**Note**: If the migration script encounters issues, you may need to manually create the workflow files and PRs as described in the "Manual Implementation" section below.
+
+## Manual Implementation
+
+If the migration script encounters issues, you can manually implement the workflows:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/PitchConnect/<repository-name>.git
+   cd <repository-name>
+   ```
+
+2. Create a branch for each long-living branch:
+   ```bash
+   # For the main branch
+   git checkout main
+   git checkout -b feature/add-org-workflows-main
+   
+   # For the develop branch (if using GitFlow)
+   git checkout develop
+   git checkout -b feature/add-org-workflows-develop
+   ```
+
+3. Create the workflow files:
+   ```bash
+   mkdir -p .github/workflows
+   ```
+
+4. Create each workflow file with the appropriate content (see examples in the "Implementation in Other Repositories" section of the README.md)
+
+5. Commit and push the changes:
+   ```bash
+   git add .github/workflows/
+   git commit -m "Add organization-wide workflows"
+   git push -u origin feature/add-org-workflows-main
+   ```
+
+6. Create PRs for each branch:
+   ```bash
+   gh pr create --title "Add organization-wide workflows (main)" --body-file <pr-body-file> --base main
+   gh pr create --title "Add organization-wide workflows (develop)" --body-file <pr-body-file> --base develop
+   ```
+
+7. After merging the PRs, run the Label Creator workflow to create the standard labels in the repository.
 
 ## Special Case: `.github` Repository
 
@@ -184,19 +243,26 @@ When implementing workflows in the `.github` repository itself:
 - End-to-end test repository: [PitchConnect/workflow-e2e-test](https://github.com/PitchConnect/workflow-e2e-test)
 - Implementation documentation: [PitchConnect/.github/README.md](https://github.com/PitchConnect/.github/blob/main/README.md)
 - Migration script: [PitchConnect/.github/scripts/migrate_to_org_workflows.sh](https://github.com/PitchConnect/.github/blob/main/scripts/migrate_to_org_workflows.sh)
+- Migration script improvements issue: [PitchConnect/.github/issues/18](https://github.com/PitchConnect/.github/issues/18)
 
 ## Next Steps
 
-1. **Roll Out to Other Repositories**:
+1. **Merge PRs in fogis-api-client-python**:
+   - Merge PR #177 for the develop branch
+   - Merge PR #178 for the main branch
+   - Run the Label Creator workflow to create the standard labels
+
+2. **Roll Out to Other Repositories**:
    - Use the migration script to add the workflows to other repositories
-   - Start with the most active repositories (fogis-api-client-python)
+   - If the script encounters issues, use the manual implementation approach
    - Ensure they're implemented on both main and develop branches for GitFlow repositories
 
-2. **Update Migration Script**:
-   - Add special handling for the `.github` repository
-   - Create standalone implementations when targeting the `.github` repository
+3. **Improve Migration Script**:
+   - Address the issues identified in issue #18
+   - Test the improved script on a test repository
+   - Update the documentation with the improved script
 
-3. **Monitor and Adjust**:
+4. **Monitor and Adjust**:
    - Monitor the workflows to ensure they're working correctly
    - Make adjustments as needed based on feedback
    - Update the documentation as necessary
