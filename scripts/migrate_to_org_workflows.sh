@@ -28,6 +28,10 @@ echo "Cloning repository: $REPO_NAME"
 gh repo clone "PitchConnect/$REPO_NAME" "$TEMP_DIR/$REPO_NAME"
 cd "$TEMP_DIR/$REPO_NAME"
 
+# Set git configuration
+git config user.email "github-actions@github.com"
+git config user.name "GitHub Actions"
+
 # Create .github/workflows directory if it doesn't exist
 mkdir -p .github/workflows
 
