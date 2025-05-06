@@ -1,0 +1,15 @@
+name: Sync CONTRIBUTING.md
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'  # Run every Sunday at midnight
+
+jobs:
+  sync-contributing:
+    uses: PitchConnect/.github/.github/workflows/contributing-sync.yml@main
+    with:
+      source_repo: 'PitchConnect/contribution-guidelines'
+      source_path: 'CONTRIBUTING.md'
+      target_path: 'CONTRIBUTING.md'
+      preserve_section: '## Repository-Specific Guidelines'
